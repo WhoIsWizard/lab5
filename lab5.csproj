@@ -46,6 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmployeeDocument.cs" />
+    <Compile Include="AddDocumentTypeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDocumentTypeForm.Designer.cs">
+      <DependentUpon>AddDocumentTypeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IDocument.cs" />
     <Compile Include="DOCDATACLASS.cs" />
     <Compile Include="FDoc.cs">
       <SubType>Form</SubType>

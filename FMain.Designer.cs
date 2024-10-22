@@ -10,6 +10,7 @@
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -45,6 +46,7 @@
             this.btnEXIT = new System.Windows.Forms.ToolStripButton();
             this.gvDOCS = new System.Windows.Forms.DataGridView();
             this.bindSRCDOC = new System.Windows.Forms.BindingSource(this.components);
+            this.documentTypeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.surnameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -54,6 +56,8 @@
             this.dateOfIssueDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dateOfExpireDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.individualTaxNumberDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.employeeIDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.departmentDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvDOCS)).BeginInit();
@@ -63,21 +67,21 @@
             // toolStrip1
             // 
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnADD,
-            this.btnEDIT,
-            this.separator1,
-            this.btnDEL,
-            this.btnCLEAR,
-            this.separator2,
-            this.btnSaveAsText,
-            this.btnSaveAsBinary,
-            this.btnOpenFromText,
-            this.btnOpenFromBinary,
-            this.separator3,
-            this.btnEXIT});
+                this.btnADD,
+                this.btnEDIT,
+                this.separator1,
+                this.btnDEL,
+                this.btnCLEAR,
+                this.separator2,
+                this.btnSaveAsText,
+                this.btnSaveAsBinary,
+                this.btnOpenFromText,
+                this.btnOpenFromBinary,
+                this.separator3,
+                this.btnEXIT});
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(800, 25);
+            toolStrip1.Size = new System.Drawing.Size(1000, 25);
             toolStrip1.TabIndex = 0;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -193,26 +197,37 @@
             this.gvDOCS.AutoGenerateColumns = false;
             this.gvDOCS.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvDOCS.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.iDDataGridViewTextBoxColumn,
-            this.nameDataGridViewTextBoxColumn,
-            this.surnameDataGridViewTextBoxColumn,
-            this.dateOfBirthDataGridViewTextBoxColumn,
-            this.nationalityDataGridViewTextBoxColumn,
-            this.sexDataGridViewTextBoxColumn,
-            this.dateOfIssueDataGridViewTextBoxColumn,
-            this.dateOfExpireDataGridViewTextBoxColumn,
-            this.individualTaxNumberDataGridViewTextBoxColumn});
+                this.documentTypeDataGridViewTextBoxColumn,
+                this.iDDataGridViewTextBoxColumn,
+                this.nameDataGridViewTextBoxColumn,
+                this.surnameDataGridViewTextBoxColumn,
+                this.dateOfBirthDataGridViewTextBoxColumn,
+                this.nationalityDataGridViewTextBoxColumn,
+                this.sexDataGridViewTextBoxColumn,
+                this.dateOfIssueDataGridViewTextBoxColumn,
+                this.dateOfExpireDataGridViewTextBoxColumn,
+                this.individualTaxNumberDataGridViewTextBoxColumn,
+                this.employeeIDDataGridViewTextBoxColumn,
+                this.departmentDataGridViewTextBoxColumn
+            });
             this.gvDOCS.DataSource = this.bindSRCDOC;
             this.gvDOCS.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvDOCS.Location = new System.Drawing.Point(0, 25);
             this.gvDOCS.Name = "gvDOCS";
             this.gvDOCS.ReadOnly = true;
-            this.gvDOCS.Size = new System.Drawing.Size(800, 425);
+            this.gvDOCS.Size = new System.Drawing.Size(1000, 425);
             this.gvDOCS.TabIndex = 1;
+            this.gvDOCS.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.gvDOCS_CellFormatting);
             // 
             // bindSRCDOC
             // 
-            this.bindSRCDOC.DataSource = typeof(lab5.DOCDATACLASS);
+            //this.bindSRCDOC.DataSource = typeof(lab5.IDocument);
+            // 
+            // documentTypeDataGridViewTextBoxColumn
+            // 
+            this.documentTypeDataGridViewTextBoxColumn.HeaderText = "Тип документу";
+            this.documentTypeDataGridViewTextBoxColumn.Name = "documentTypeDataGridViewTextBoxColumn";
+            this.documentTypeDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // iDDataGridViewTextBoxColumn
             // 
@@ -251,7 +266,7 @@
             // 
             // sexDataGridViewTextBoxColumn
             // 
-            this.sexDataGridViewTextBoxColumn.DataPropertyName = "SexString";
+            this.sexDataGridViewTextBoxColumn.DataPropertyName = "sex";
             this.sexDataGridViewTextBoxColumn.HeaderText = "Стать";
             this.sexDataGridViewTextBoxColumn.Name = "sexDataGridViewTextBoxColumn";
             this.sexDataGridViewTextBoxColumn.ReadOnly = true;
@@ -277,11 +292,25 @@
             this.individualTaxNumberDataGridViewTextBoxColumn.Name = "individualTaxNumberDataGridViewTextBoxColumn";
             this.individualTaxNumberDataGridViewTextBoxColumn.ReadOnly = true;
             // 
+            // employeeIDDataGridViewTextBoxColumn
+            // 
+            this.employeeIDDataGridViewTextBoxColumn.DataPropertyName = "EmployeeID";
+            this.employeeIDDataGridViewTextBoxColumn.HeaderText = "ID працівника";
+            this.employeeIDDataGridViewTextBoxColumn.Name = "employeeIDDataGridViewTextBoxColumn";
+            this.employeeIDDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // departmentDataGridViewTextBoxColumn
+            // 
+            this.departmentDataGridViewTextBoxColumn.DataPropertyName = "Department";
+            this.departmentDataGridViewTextBoxColumn.HeaderText = "Відділ";
+            this.departmentDataGridViewTextBoxColumn.Name = "departmentDataGridViewTextBoxColumn";
+            this.departmentDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
             // FORMMAIN
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1000, 450);
             this.Controls.Add(this.gvDOCS);
             this.Controls.Add(toolStrip1);
             this.Name = "FORMMAIN";
@@ -312,6 +341,7 @@
         private System.Windows.Forms.ToolStripButton btnEXIT;
         private System.Windows.Forms.DataGridView gvDOCS;
         private System.Windows.Forms.BindingSource bindSRCDOC;
+        private System.Windows.Forms.DataGridViewTextBoxColumn documentTypeDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn surnameDataGridViewTextBoxColumn;
@@ -321,5 +351,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dateOfIssueDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn dateOfExpireDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn individualTaxNumberDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn employeeIDDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn departmentDataGridViewTextBoxColumn;
     }
 }

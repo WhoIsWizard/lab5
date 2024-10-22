@@ -8,7 +8,7 @@ namespace lab5
 {
     public partial class FORMMAIN : Form
     {
-        private BindingList<DOCDATACLASS> dataSource;
+        private BindingList<IDocument> dataSource;
 
         public FORMMAIN()
         {
@@ -17,12 +17,75 @@ namespace lab5
 
         private void btnADD_Click(object sender, EventArgs e)
         {
-            DOCDATACLASS data = new DOCDATACLASS();
-
-            FDoc fd = new FDoc(data);
-            if (fd.ShowDialog() == DialogResult.OK)
+            // Відкрити діалог вибору типу документу
+            using (AddDocumentTypeForm addTypeForm = new AddDocumentTypeForm())
             {
-                dataSource.Add(data);
+                if (addTypeForm.ShowDialog() == DialogResult.OK)
+                {
+                    IDocument data;
+                    if (addTypeForm.SelectedDocumentType == DocumentType.Regular)
+                    {
+                        data = new DOCDATACLASS();
+                    }
+                    else // EmployeeDocument
+                    {
+                        data = new EmployeeDocument();
+                    }
+
+                    FDoc fd = new FDoc(data);
+                    if (fd.ShowDialog() == DialogResult.OK)
+                    {
+                        dataSource.Add(data);
+                    }
+                }
+            }
+        }
+        private void gvDOCS_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            // Форматування стовпця "Стать"
+            if (gvDOCS.Columns[e.ColumnIndex].Name == "sexDataGridViewTextBoxColumn" && e.Value != null)
+            {
+                bool sex = (bool)e.Value;
+                e.Value = sex ? "Чоловік" : "Жінка";
+                e.FormattingApplied = true;
+            }
+
+            // Форматування стовпця "Тип документу"
+            if (gvDOCS.Columns[e.ColumnIndex].Name == "documentTypeDataGridViewTextBoxColumn" && e.RowIndex >= 0)
+            {
+                IDocument doc = (IDocument)gvDOCS.Rows[e.RowIndex].DataBoundItem;
+                e.Value = doc is EmployeeDocument ? "Працівник" : "Звичайний";
+                e.FormattingApplied = true;
+            }
+
+            // Заповнення стовпця "ID працівника"
+            if (gvDOCS.Columns[e.ColumnIndex].Name == "employeeIDDataGridViewTextBoxColumn" && e.RowIndex >= 0)
+            {
+                IDocument doc = (IDocument)gvDOCS.Rows[e.RowIndex].DataBoundItem;
+                if (doc is EmployeeDocument empDoc)
+                {
+                    e.Value = empDoc.EmployeeID;
+                }
+                else
+                {
+                    e.Value = string.Empty; // Або інше значення за замовчуванням
+                }
+                e.FormattingApplied = true;
+            }
+
+            // Заповнення стовпця "Відділ"
+            if (gvDOCS.Columns[e.ColumnIndex].Name == "departmentDataGridViewTextBoxColumn" && e.RowIndex >= 0)
+            {
+                IDocument doc = (IDocument)gvDOCS.Rows[e.RowIndex].DataBoundItem;
+                if (doc is EmployeeDocument empDoc)
+                {
+                    e.Value = empDoc.Department;
+                }
+                else
+                {
+                    e.Value = string.Empty; // Або інше значення за замовчуванням
+                }
+                e.FormattingApplied = true;
             }
         }
 
@@ -30,7 +93,7 @@ namespace lab5
         {
             if (gvDOCS.CurrentRow != null)
             {
-                DOCDATACLASS data = (DOCDATACLASS)gvDOCS.CurrentRow.DataBoundItem;
+                IDocument data = (IDocument)gvDOCS.CurrentRow.DataBoundItem;
 
                 FDoc fd = new FDoc(data);
                 if (fd.ShowDialog() == DialogResult.OK)
@@ -47,7 +110,7 @@ namespace lab5
                 if (MessageBox.Show("Видалити поточний запис?", "Видалення запису",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK)
                 {
-                    DOCDATACLASS data = (DOCDATACLASS)gvDOCS.CurrentRow.DataBoundItem;
+                    IDocument data = (IDocument)gvDOCS.CurrentRow.DataBoundItem;
                     dataSource.Remove(data);
                 }
             }
@@ -74,32 +137,24 @@ namespace lab5
 
         private void FORMMAIN_Load(object sender, EventArgs e)
         {
-            // Since the columns are defined in the Designer, we don't need to add them here.
-            // So, remove or comment out the code that adds columns programmatically.
-
-            // Ensure that AutoGenerateColumns is set to false
             gvDOCS.AutoGenerateColumns = false;
 
-            // Initialize your data source
-            dataSource = new BindingList<DOCDATACLASS>();
+            dataSource = new BindingList<IDocument>();
 
-            // Add sample data if needed
+            // Додавання прикладів даних
             dataSource.Add(new DOCDATACLASS("123456", "Іван", "Рево", "01-01-1990", "Україна", true, "01-01-2015", "01-01-2025", "1234567890"));
+            dataSource.Add(new EmployeeDocument("654321", "Олена", "Коваль", "05-05-1985", "Україна", false, "01-01-2016", "01-01-2026", "0987654321", "E123", "HR"));
 
-            // Bind the data source to the BindingSource
             bindSRCDOC.DataSource = dataSource;
 
-            // Bind the BindingSource to the DataGridView
             gvDOCS.DataSource = bindSRCDOC;
 
-            // Adjust column widths if necessary
             gvDOCS.AutoResizeColumns();
         }
 
-
         private void btnSaveAsText_Click(object sender, EventArgs e)
         {
-            // Create a SaveFileDialog to prompt the user for a file path
+            // Створення діалогу збереження файлу
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Текстові файли (*.txt)|*.txt|All files (*.*)|*.*";
             saveFileDialog.Title = "Зберегти дані у текстовому форматі";
@@ -107,30 +162,31 @@ namespace lab5
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                // Create a StreamWriter to write data to the selected file
+                // Запис даних у текстовий файл
                 using (StreamWriter sw = new StreamWriter(saveFileDialog.FileName, false, Encoding.UTF8))
                 {
                     try
                     {
-                        // Iterate over each DOCDATACLASS item in the binding source
-                        foreach (DOCDATACLASS doc in bindSRCDOC.List)
+                        foreach (IDocument doc in bindSRCDOC.List)
                         {
-                            // Write the properties of DOCDATACLASS separated by tabs
-                            sw.WriteLine(
-                                doc.ID + "\t" +
-                                doc.Name + "\t" +
-                                doc.Surname + "\t" +
-                                doc.Date_Of_Birth + "\t" +
-                                doc.Nationality + "\t" +
-                                doc.Date_Of_Issue + "\t" +
-                                doc.Date_Of_expire + "\t" +
-                                doc.Individual_tax_number
-                            );
+                            // Додаємо інформацію про тип документу для коректного завантаження
+                            string docType = doc is EmployeeDocument ? "Employee" : "Regular";
+
+                            sw.WriteLine(docType + "|" +
+                                doc.ID + "|" +
+                                doc.Name + "|" +
+                                doc.Surname + "|" +
+                                doc.Date_Of_Birth + "|" +
+                                doc.Nationality + "|" +
+                                doc.sex + "|" +
+                                doc.Date_Of_Issue + "|" +
+                                doc.Date_Of_expire + "|" +
+                                doc.Individual_tax_number +
+                                (doc is EmployeeDocument empDoc ? "|" + empDoc.EmployeeID + "|" + empDoc.Department : ""));
                         }
                     }
                     catch (Exception ex)
                     {
-                        // Show an error message if something goes wrong
                         MessageBox.Show($"Сталася помилка: \n{ex.Message}",
                                         "Помилка",
                                         MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -153,8 +209,12 @@ namespace lab5
                 {
                     try
                     {
-                        foreach (DOCDATACLASS doc in bindSRCDOC.List)
+                        foreach (IDocument doc in bindSRCDOC.List)
                         {
+                            // Запис типу документу
+                            bw.Write(doc is EmployeeDocument ? "Employee" : "Regular");
+
+                            // Запис загальних властивостей
                             bw.Write(doc.ID ?? "");
                             bw.Write(doc.Name ?? "");
                             bw.Write(doc.Surname ?? "");
@@ -164,6 +224,13 @@ namespace lab5
                             bw.Write(doc.Date_Of_Issue ?? "");
                             bw.Write(doc.Date_Of_expire ?? "");
                             bw.Write(doc.Individual_tax_number ?? "");
+
+                            // Запис додаткових властивостей, якщо документ є EmployeeDocument
+                            if (doc is EmployeeDocument empDoc)
+                            {
+                                bw.Write(empDoc.EmployeeID ?? "");
+                                bw.Write(empDoc.Department ?? "");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -187,7 +254,7 @@ namespace lab5
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                // Clear existing data
+                // Очистити існуючі дані
                 dataSource.Clear();
 
                 using (StreamReader sr = new StreamReader(openFileDialog.FileName, Encoding.UTF8))
@@ -197,24 +264,53 @@ namespace lab5
                         string s;
                         while ((s = sr.ReadLine()) != null)
                         {
-                            string[] split = s.Split('\t');
+                            string[] split = s.Split('|');
 
-                            if (split.Length >= 9)
+                            if (split.Length >= 10)
                             {
-                                DOCDATACLASS doc = new DOCDATACLASS
+                                string docType = split[0];
+                                if (docType == "Regular" && split.Length >= 10)
                                 {
-                                    ID = split[0],
-                                    Name = split[1],
-                                    Surname = split[2],
-                                    Date_Of_Birth = split[3],
-                                    Nationality = split[4],
-                                    sex = split[5] == "Чоловік",
-                                    Date_Of_Issue = split[6],
-                                    Date_Of_expire = split[7],
-                                    Individual_tax_number = split[8]
-                                };
-
-                                dataSource.Add(doc);
+                                    DOCDATACLASS doc = new DOCDATACLASS
+                                    {
+                                        ID = split[1],
+                                        Name = split[2],
+                                        Surname = split[3],
+                                        Date_Of_Birth = split[4],
+                                        Nationality = split[5],
+                                        sex = split[6] == "True",
+                                        Date_Of_Issue = split[7],
+                                        Date_Of_expire = split[8],
+                                        Individual_tax_number = split[9]
+                                    };
+                                    dataSource.Add(doc);
+                                }
+                                else if (docType == "Employee" && split.Length >= 12)
+                                {
+                                    EmployeeDocument empDoc = new EmployeeDocument
+                                    {
+                                        ID = split[1],
+                                        Name = split[2],
+                                        Surname = split[3],
+                                        Date_Of_Birth = split[4],
+                                        Nationality = split[5],
+                                        sex = split[6] == "True",
+                                        Date_Of_Issue = split[7],
+                                        Date_Of_expire = split[8],
+                                        Individual_tax_number = split[9],
+                                        EmployeeID = split[10],
+                                        Department = split[11]
+                                    };
+                                    dataSource.Add(empDoc);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Неправильний формат даних у файлі.",
+                                                    "Помилка",
+                                                    MessageBoxButtons.OK,
+                                                    MessageBoxIcon.Error);
+                                    break;
+                                }
                             }
                             else
                             {
@@ -247,7 +343,7 @@ namespace lab5
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                // Clear existing data
+                // Очистити існуючі дані
                 dataSource.Clear();
 
                 using (BinaryReader br = new BinaryReader(openFileDialog.OpenFile()))
@@ -256,21 +352,50 @@ namespace lab5
                     {
                         while (br.BaseStream.Position < br.BaseStream.Length)
                         {
-                            DOCDATACLASS doc = new DOCDATACLASS();
+                            string docType = br.ReadString();
 
-                            // Read data in the same order as it was written
-                            doc.ID = br.ReadString();
-                            doc.Name = br.ReadString();
-                            doc.Surname = br.ReadString();
-                            doc.Date_Of_Birth = br.ReadString();
-                            doc.Nationality = br.ReadString();
-                            doc.sex = br.ReadBoolean();
-                            doc.Date_Of_Issue = br.ReadString();
-                            doc.Date_Of_expire = br.ReadString();
-                            doc.Individual_tax_number = br.ReadString();
-
-                            // Add the doc to the data source
-                            dataSource.Add(doc);
+                            if (docType == "Regular")
+                            {
+                                DOCDATACLASS doc = new DOCDATACLASS
+                                {
+                                    ID = br.ReadString(),
+                                    Name = br.ReadString(),
+                                    Surname = br.ReadString(),
+                                    Date_Of_Birth = br.ReadString(),
+                                    Nationality = br.ReadString(),
+                                    sex = br.ReadBoolean(),
+                                    Date_Of_Issue = br.ReadString(),
+                                    Date_Of_expire = br.ReadString(),
+                                    Individual_tax_number = br.ReadString()
+                                };
+                                dataSource.Add(doc);
+                            }
+                            else if (docType == "Employee")
+                            {
+                                EmployeeDocument empDoc = new EmployeeDocument
+                                {
+                                    ID = br.ReadString(),
+                                    Name = br.ReadString(),
+                                    Surname = br.ReadString(),
+                                    Date_Of_Birth = br.ReadString(),
+                                    Nationality = br.ReadString(),
+                                    sex = br.ReadBoolean(),
+                                    Date_Of_Issue = br.ReadString(),
+                                    Date_Of_expire = br.ReadString(),
+                                    Individual_tax_number = br.ReadString(),
+                                    EmployeeID = br.ReadString(),
+                                    Department = br.ReadString()
+                                };
+                                dataSource.Add(empDoc);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Невідомий тип документу у файлі.",
+                                                "Помилка",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Error);
+                                break;
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -284,7 +409,7 @@ namespace lab5
             }
 
         }
+
+        
     }
 }
-
-

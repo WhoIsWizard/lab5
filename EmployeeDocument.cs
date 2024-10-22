@@ -2,7 +2,7 @@
 
 namespace lab5
 {
-    public class DOCDATACLASS : IDocument
+    public class EmployeeDocument : IDocument
     {
         public string ID { get; set; }
         public string Name { get; set; }
@@ -13,6 +13,10 @@ namespace lab5
         public string Date_Of_Issue { get; set; }
         public string Date_Of_expire { get; set; }
         public string Individual_tax_number { get; set; }
+
+        // Додаткові властивості для працівника
+        public string EmployeeID { get; set; }
+        public string Department { get; set; }
 
         public int Passport_Expired_in()
         {
@@ -29,13 +33,13 @@ namespace lab5
             return years;
         }
 
-        public DOCDATACLASS()
+        public EmployeeDocument()
         {
-
         }
 
-        public DOCDATACLASS(string ID, string name, string surname, string date_of_birth, string nationality,
-            bool sex, string date_of_issue, string date_of_expire, string individual_tax_number)
+        public EmployeeDocument(string ID, string name, string surname, string date_of_birth, string nationality,
+            bool sex, string date_of_issue, string date_of_expire, string individual_tax_number,
+            string employeeID, string department)
         {
             this.ID = ID;
             Name = name;
@@ -46,6 +50,8 @@ namespace lab5
             Date_Of_Issue = date_of_issue;
             Date_Of_expire = date_of_expire;
             Individual_tax_number = individual_tax_number;
+            EmployeeID = employeeID;
+            Department = department;
         }
     }
 }

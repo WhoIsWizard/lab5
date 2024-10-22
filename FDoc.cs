@@ -1,47 +1,54 @@
 ﻿using lab5;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace lab5
 {
     public partial class FDoc : Form
     {
-        
-        public DOCDATACLASS thePass_doc;
+        public IDocument thePass_doc;
 
-        public FDoc(DOCDATACLASS p)
+        public FDoc(IDocument p)
         {
             thePass_doc = p;
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void FDoc_Load(object sender, EventArgs e)
         {
             if (thePass_doc != null)
             {
                 tbID.Text = thePass_doc.ID;
                 tbName.Text = thePass_doc.Name;
                 tbSurname.Text = thePass_doc.Surname;
-                tbDateOfBirth.Text = thePass_doc.ToString();
+                tbDateOfBirth.Text = thePass_doc.Date_Of_Birth;
                 tbNationality.Text = thePass_doc.Nationality;
-                tbDateofIssue.Text = thePass_doc.ToString();
-                tbDateofExpire.Text = thePass_doc.ToString();
-                
-            }
+                tbDateofIssue.Text = thePass_doc.Date_Of_Issue;
+                tbDateofExpire.Text = thePass_doc.Date_Of_expire;
+                tbIndividualTaxNum.Text = thePass_doc.Individual_tax_number;
+                cbMale.Checked = thePass_doc.sex;
+                cbFemale.Checked = !thePass_doc.sex;
 
+                // Перевірка, чи документ є EmployeeDocument
+                if (thePass_doc is EmployeeDocument empDoc)
+                {
+                    tbEmployeeID.Text = empDoc.EmployeeID;
+                    tbDepartment.Text = empDoc.Department;
+                    // Відкрити групу додаткових полів
+                    groupBoxEmployee.Visible = true;
+                }
+                else
+                {
+                    // Приховати групу додаткових полів
+                    groupBoxEmployee.Visible = false;
+                }
+            }
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
             thePass_doc.ID = tbID.Text.Trim();
-            thePass_doc.Name = tbName.Text.Trim(); 
+            thePass_doc.Name = tbName.Text.Trim();
             thePass_doc.Surname = tbSurname.Text.Trim();
             thePass_doc.Date_Of_Birth = tbDateOfBirth.Text.Trim();
             thePass_doc.Nationality = tbNationality.Text.Trim();
@@ -49,8 +56,14 @@ namespace lab5
             thePass_doc.Date_Of_expire = tbDateofExpire.Text.Trim();
             thePass_doc.Individual_tax_number = tbIndividualTaxNum.Text.Trim();
             thePass_doc.sex = cbMale.Checked;
-            thePass_doc.sex = cbFemale.Checked;
-            
+
+            // Перевірка, чи документ є EmployeeDocument
+            if (thePass_doc is EmployeeDocument empDoc)
+            {
+                empDoc.EmployeeID = tbEmployeeID.Text.Trim();
+                empDoc.Department = tbDepartment.Text.Trim();
+            }
+
             DialogResult = DialogResult.OK;
         }
 
@@ -58,5 +71,6 @@ namespace lab5
         {
             DialogResult = DialogResult.Cancel;
         }
+
     }
 }
